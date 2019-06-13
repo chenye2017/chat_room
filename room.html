@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div>
+        <span id="name"></span>
+        <image id="avatar" src="" width="50px"/>
+    </div>
+
+    <div style="height: 500px;border: 1px solid" id="talk"> 
+    
+           <!--  <div class="" style="display:flex;flex-direction:row-reverse;margin: 10px 10px;">
+                <div class="pull-right" style="background-color:green;width:auto; display:inline-block !important; display:inline;">www</div>
+            </div> -->
+    
+    
+    </div>
+
+    
+
+    <div>
+
+        <div>
+            <input id="content" >
+            <button id="send">发送</button>
+        </div>
+
+    </div>   
+      
+</body>
+
+
+<script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.js"></script>
+<script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+<script>
+    
+   
+    var Request = new Object();	 
+Request = GetRequest();
+function GetRequest() {		 
+	 var url = location.search; 
+	 var theRequest = new Object();		 
+	 if (url.indexOf("?") != -1) {		 
+	    var str = url.substr(1);		 
+	    strs = str.split("&");		 
+	    for(var i = 0; i < strs.length; i++) {		 
+	       theRequest[strs[i].split("=")[0]]=decodeURI(strs[i].split("=")[1]);		 
+	    }		 
+	 }		 
+	 return theRequest;		 
+
+}
+
+var num = Request['num'];
+
+$('#name').text(num)
+
+$('#avatar').attr('src', 'http://room.test/avater/'+num+'.jpg')
+
+
+// ws
+
+var ws = new WebSocket("ws://192.168.33.10:9501");
+
+ws.onopen = function(evt) { 
+  console.log("Connection open ..."); 
+  ws.send("join:"+ num);
+};
+
+ws.onmessage = function(evt) {
+  //console.log( "Received Message: " + evt.data);
+  var content = evt.data.split(':');
+
+  if (content[0] == 'talk') {
+
+  var html = '<div class="" style="display:flex;flex-direction:row;margin: 10px 10px;">';
+        html +=       ' <div class="pull-right" style="background-color:;width:auto; display:inline-block !important; display:inline;">'+content[1]+'</div>'
+        html +=    '</div>'
+    $('#talk').append(html)
+  } else {
+    var html = '<div class="" style="display:flex;justify-content:center;align-items:center;margin: 10px 10px;">';
+        html +=       ' <div class="" style="background-color:red;width:auto; display:inline-block !important; display:inline;">'+content[1]+'</div>'
+        html +=    '</div>'
+    $('#talk').append(html)
+
+
+  }
+ // ws.close();
+};
+
+ws.onclose = function(evt) {
+  console.log("Connection closed.");
+}; 
+
+
+$(document).delegate('#send', 'click', function() {
+    var content = $('#content').val();
+
+    var html = '<div class="" style="display:flex;flex-direction:row-reverse;margin: 10px 10px;">';
+        html +=       ' <div class="pull-right" style="background-color:green;width:auto; display:inline-block !important; display:inline;">'+content+'</div>'
+        html +=    '</div>'
+
+        console.log(html)
+   
+    $('#talk').append(html)
+
+    ws.send("talk:" + content);
+
+
+})
+
+</script>
+
+</html>
